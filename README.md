@@ -12,22 +12,22 @@ Results are send to thrift server (Project includes sample thrift server that lo
 - boost
 - cmake 3.6
 
-2. How to build 
+2. Build steps
 
-a. install major dependancies
+- install major dependancies
 
-b. clone project to your folder
+- clone project to your folder
 
-c. set the LIBFREERADIUS_INCL variable to path to folder where the 'freeradius-devel/libradius.h' header file can be resolved, 
+- set the LIBFREERADIUS_INCL variable to path to folder where the 'freeradius-devel/libradius.h' header file can be resolved, 
         e.g. if freeradius is built in the folder ~/Downloads/freeradius-server-3.0.15 then the variable shall be set:
         
     > export LIBFREERADIUS_INCL=~/Downloads/freeradius-server-3.0.15/src/
 
-d. create makefiles by using cmake tool from the root of cloned folder:
+- create makefiles by using cmake tool from the root of cloned folder:
  
     > cmake .     
        
-e. build binary files from the root of cloned folder:
+- build binary files from the root of cloned folder (Catch unittest project will be downloaded from github during building):
 
     > make all
  
@@ -36,4 +36,25 @@ As a result 3 binary files will be built:
   - PairerSelfTest      - unit test runner
   - ThriftLoggingServer - sample logging thrift server
   
- 
+## How to run
+
+1. Update the configuration file (pairer.ini)
+
+2. Run Thrift server
+> ./ThriftLoggingServer
+
+3. Run pairer
+> ./Pairer
+
+## How to Test
+
+1. Unittesting
+> ./PairerSelfTest
+
+2. Use radius client or seagull sending requests to pairer
+
+3. Use proxy mode on pairer to proxy and store RADIUS requests/responses between radius client and radius server
+
+- enable proxy mode by setting the ProxyModeEnabled to 'true'
+- please configure radius server ip/port (the pairer will forward request to/responses from) by updating the proxy section of ini file
+
