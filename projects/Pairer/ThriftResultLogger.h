@@ -45,6 +45,19 @@ namespace pairer {
             void reportPair(pairer::Message *req, pairer::Message *rsp) override;
 
         protected:
+            class ThriftServerConnectionError: public std::exception {
+            public:
+                const char *what() const noexcept override {
+                    return "Could not connect to Thrift Server. Please ensure it is run";
+                };
+            };
+            class ThriftServerCommunicationError: public std::exception {
+            public:
+                const char *what() const noexcept override {
+                    return "Could not send data to Thrift Server. Please ensure it is run";
+                };
+            };
+
             /** transforms message data to thrift specific structures
              *
              * @param src message internal structure

@@ -11,11 +11,17 @@
 using namespace pairer::reporting;
 
 ThriftResultLogger::ThriftResultLogger(uint32_t app_id, const std::string &thrift_ip, int32_t thrift_port):ResultReporter(app_id) {
-    socket_ = boost::shared_ptr<TSocket>(new TSocket(thrift_ip, thrift_port));
-    transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
-    protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
-    client_ = boost::shared_ptr<LoggerClient>(new LoggerClient(protocol_));
-    transport_->open();
+    try {
+        socket_ = boost::shared_ptr<TSocket>(new TSocket(thrift_ip, thrift_port));
+        transport_ = boost::shared_ptr<TTransport>(new TBufferedTransport(socket_));
+        protocol_ = boost::shared_ptr<TProtocol>(new TBinaryProtocol(transport_));
+        client_ = boost::shared_ptr<LoggerClient>(new LoggerClient(protocol_));
+        transport_->open();
+    }
+    catch (const std::exception& e) {
+        // could not open transport to Thrift Server
+        throw ThriftServerConnectionError();
+    }
 }
 
 ThriftResultLogger::~ThriftResultLogger() {
@@ -50,5 +56,12 @@ void ThriftResultLogger::reportPair(pairer::Message *req, pairer::Message *rsp) 
     request.__set_sourceId(app_id_);
     request.__set_captureTimestamp((int32_t)system_clock::to_time_t(system_clock::now()));
 
-    client_->logRequest(request);
+    try {
+        client_->logRequest(request);
+    }
+    catch (const std::exception& e) {
+        // could not open transport to Thrift Server
+        throw ThriftServerCommunicationError();
+
+    }
 }

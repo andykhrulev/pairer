@@ -21,39 +21,45 @@ int main() {
     using namespace pairer;
 
     radius::RadiusMessageReceiver* receiver;
-    Config config;
 
-    LOGGER_STR_ARG2("RADIUS Receiver: %s:%d",config.receiverIp().c_str(),config.receiverPort());
-    LOGGER_STR_ARG2("RADIUS server  : %s:%d",config.radiusServerIp().c_str(),config.radiusServerPort());
-    LOGGER_STR_ARG2("Thift server: %s:%d",config.thriftServerIp().c_str(),config.thriftServerPort());
+    try {
+        Config config;
 
-    // use simple cache for storing received requests
-    auto cache = std::shared_ptr<cache::DataCache>(new cache::SimpleMapCache());
+        LOGGER_STR_ARG2("RADIUS Receiver: %s:%d", config.receiverIp().c_str(), config.receiverPort());
+        LOGGER_STR_ARG2("RADIUS server  : %s:%d", config.radiusServerIp().c_str(), config.radiusServerPort());
+        LOGGER_STR_ARG2("Thift server: %s:%d", config.thriftServerIp().c_str(), config.thriftServerPort());
 
-    // use timer pool to track responses
-    auto timer_pool = std::shared_ptr<utils::TimerPool<std::string>>(
-            new utils::TimerPool<std::string>(nullptr, config.responseTimeout()));
+        // use simple cache for storing received requests
+        auto cache = std::shared_ptr<cache::DataCache>(new cache::SimpleMapCache());
 
-    // use thrift result logger for reporting
-    auto reporter = std::shared_ptr<reporting::ResultReporter>(
-            new reporting::ThriftResultLogger(config.appId(),config.thriftServerIp(), config.thriftServerPort()));
+        // use timer pool to track responses
+        auto timer_pool = std::shared_ptr<utils::TimerPool<std::string>>(
+                new utils::TimerPool<std::string>(nullptr, config.responseTimeout()));
 
-    //statistic to be stored each 2 mins (=2 * 60 * 1000 msec)
-    auto stats = std::shared_ptr<utils::AppStats>(new utils::AppStats(
-            SimpleSyncReceivedMessageHandler::NUM_COUNTERS_USED,config.statisticPeriod()));
+        // use thrift result logger for reporting
+        auto reporter = std::shared_ptr<reporting::ResultReporter>(
+                new reporting::ThriftResultLogger(config.appId(), config.thriftServerIp(), config.thriftServerPort()));
 
-    timer_pool->start();
+        //statistic to be stored each 2 mins (=2 * 60 * 1000 msec)
+        auto stats = std::shared_ptr<utils::AppStats>(
+                new utils::AppStats(SimpleSyncReceivedMessageHandler::NUM_COUNTERS_USED, config.statisticPeriod()));
 
-    if (config.proxyMode()) {
-        receiver = new radius::RadiusProxyMsgReceiver(
-                new SimpleSyncReceivedMessageHandler(cache, timer_pool, reporter, stats),
-                config.radiusServerIp(), config.radiusServerPort());
-    } else {
-        receiver = new radius::RadiusMessageReceiver(
-                new SimpleSyncReceivedMessageHandler(cache, timer_pool, reporter, stats));
+        timer_pool->start();
+
+        if (config.proxyMode()) {
+            receiver = new radius::RadiusProxyMsgReceiver(
+                    new SimpleSyncReceivedMessageHandler(cache, timer_pool, reporter, stats), config.radiusServerIp(),
+                    config.radiusServerPort());
+        } else {
+            receiver = new radius::RadiusMessageReceiver(
+                    new SimpleSyncReceivedMessageHandler(cache, timer_pool, reporter, stats));
+        }
+
+        receiver->start(config.receiverIp(), config.receiverPort());
     }
-
-    receiver->start(config.receiverIp(), config.receiverPort());
+    catch(const std::exception& e) {
+        cout << "ERROR: " << e.what() << std::endl;
+    }
 
     return 0;
 

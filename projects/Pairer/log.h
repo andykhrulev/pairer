@@ -79,7 +79,6 @@ public:
         }
         else {
             errstream->flush();
-            delete errstream;
         }
     }
 
