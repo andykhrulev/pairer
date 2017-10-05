@@ -38,13 +38,13 @@ protected:
 };
 
 int main(int argc, char **argv) {
-#ifdef DEBUG_ENABLED
-    std::ofstream of("thrift.log");
-    INIT_DEBUG(&of);
-#endif
-
     try {
         Config config;
+
+    #ifdef DEBUG_ENABLED
+        std::ofstream of(config.thriftDebugFileName());
+        INIT_DEBUG(&of);
+    #endif
 
         shared_ptr<LoggerHandler> handler(new LoggerHandler(config.thriftLoggingFileName()));
         shared_ptr<TProcessor> processor(new LoggerProcessor(handler));

@@ -13,17 +13,17 @@ ENABLE_DEBUG()
 using namespace std;
 
 int main() {
-#ifdef DEBUG_ENABLED
-    ofstream of("pairer.log");
-    INIT_DEBUG(&of);
-#endif
-
     using namespace pairer;
 
     radius::RadiusMessageReceiver* receiver;
 
     try {
         Config config;
+
+#ifdef DEBUG_ENABLED
+        ofstream of(config.pairerDebugFileName());
+        INIT_DEBUG(&of);
+#endif
 
         LOGGER_STR_ARG2("RADIUS Receiver: %s:%d", config.receiverIp().c_str(), config.receiverPort());
         LOGGER_STR_ARG2("RADIUS server  : %s:%d", config.radiusServerIp().c_str(), config.radiusServerPort());

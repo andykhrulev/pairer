@@ -30,6 +30,10 @@ namespace pairer {
         const char *APP_ID = "AppId";
         const char *THRIFT_SRV_LOG_FNAME = "LoggingFileName";
 
+        const char *DEBUG_PAIRER_LOG_FNAME = "debug.PairerDebugFilename";
+        const char *DEBUG_PAIRERTST_LOG_FNAME = "debug.PairerSelfTestDebugFilename";
+        const char *DEBUG_PAIRERTHRIFT_LOG_FNAME = "debug.PairerThriftServerDebugFilename";
+
     public:
         Config(const std::string &ini_file = std::string("pairer.ini")) {
             LOGGER_IN()
@@ -44,16 +48,19 @@ namespace pairer {
 
                 desc.add_options()
                         (RECEIVER_IP, po::value<std::string>(&receiver_ip_)->default_value("127.0.0.1"))
-                        (RECEIVER_PORT, po::value<uint32_t>(&receiver_port_)->default_value(9901))
+                        (RECEIVER_PORT, po::value<uint16_t>(&receiver_port_)->default_value(9901))
                         (RESPONSE_TIMEOUT, po::value<uint32_t>( &response_timeout_)->default_value(2000))
                         (PROXY_MODE, po::value<bool>(&proxy_mode_)->default_value(false))
                         (STAT_PERIOD, po::value<uint32_t>( &stat_period_)->default_value(12000))
                         (APP_ID, po::value<uint32_t>( &app_id_)->default_value(101))
                         (THRIFT_SRV_IP, po::value<std::string>( &thrift_ip_)->default_value("127.0.0.1"))
-                        (THRIFT_SRV_PORT, po::value<uint32_t>(&thrift_port_)->default_value(9090))
+                        (THRIFT_SRV_PORT, po::value<uint16_t>(&thrift_port_)->default_value(9090))
                         (THRIFT_SRV_LOG_FNAME, po::value<std::string>( &thrift_logging_file_name_)->default_value("thrift.log"))
+                        (DEBUG_PAIRER_LOG_FNAME, po::value<std::string>( &pairer_debug_file_name_)->default_value("pairer.debug.log"))
+                        (DEBUG_PAIRERTST_LOG_FNAME, po::value<std::string>( &pairer_debug_tst_file_name_)->default_value("pairertst.debug.log"))
+                        (DEBUG_PAIRERTHRIFT_LOG_FNAME, po::value<std::string>( &pairer_debug_thrift_file_name_)->default_value("thrift.debug.log"))
                         (RADIUS_SRV_IP, po::value<std::string>( &radius_srv_ip_)->default_value( "127.0.0.1"))
-                        (RADIUS_SRV_PORT, po::value<uint32_t>(&radius_srv_port_)->default_value(9801));
+                        (RADIUS_SRV_PORT, po::value<uint16_t>(&radius_srv_port_)->default_value(9801));
 
                 po::store(po::parse_config_file(conf_file, desc, true), vm);
                 po::notify(vm);
@@ -65,7 +72,7 @@ namespace pairer {
 
         std::string receiverIp() { return receiver_ip_; }
 
-        uint32_t receiverPort() { return receiver_port_; }
+        uint16_t receiverPort() { return receiver_port_; }
 
         std::chrono::milliseconds responseTimeout() { return std::chrono::milliseconds(response_timeout_); }
 
@@ -75,28 +82,35 @@ namespace pairer {
 
         std::string radiusServerIp() { return radius_srv_ip_; }
 
-        uint32_t radiusServerPort() { return radius_srv_port_; }
+        uint16_t radiusServerPort() { return radius_srv_port_; }
 
         std::string thriftServerIp() { return thrift_ip_; }
 
-        uint32_t thriftServerPort() { return thrift_port_; }
+        uint16_t thriftServerPort() { return thrift_port_; }
 
         uint32_t appId() { return app_id_; }
 
         std::string thriftLoggingFileName() {return thrift_logging_file_name_;};
 
+        std::string pairerDebugFileName() {return pairer_debug_file_name_;};
+        std::string pairerTstDebugFileName() {return pairer_debug_tst_file_name_;};
+        std::string thriftDebugFileName() {return pairer_debug_thrift_file_name_;};
+
     protected:
         std::string receiver_ip_;
-        uint32_t receiver_port_;
+        uint16_t receiver_port_;
         uint32_t response_timeout_;
         bool proxy_mode_;
         uint32_t stat_period_;
         std::string thrift_ip_;
-        uint32_t thrift_port_;
+        uint16_t thrift_port_;
         std::string radius_srv_ip_;
-        uint32_t radius_srv_port_;
+        uint16_t radius_srv_port_;
         uint32_t app_id_;
         std::string thrift_logging_file_name_;
+        std::string pairer_debug_file_name_;
+        std::string pairer_debug_tst_file_name_;
+        std::string pairer_debug_thrift_file_name_;
     };
 }
 
